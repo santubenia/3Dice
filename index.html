@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>3D Dice Rotation Game</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="hud">
+        <label for="guessInput">Guess 1–6:</label>
+        <input id="guessInput" type="number" min="1" max="6" placeholder="Enter guess" />
+        <button id="rollBtn">Roll</button>
+        <div id="result" class="hidden">—</div>
+        <div id="score">Score: 0</div>
+        <div id="highScore">High: 0</div>
+      </div>
+      <div id="preview" class="hidden">
+        <div id="previewCard">
+          <canvas id="facePreview" width="160" height="160"></canvas>
+          <div id="previewLabel">Result</div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
