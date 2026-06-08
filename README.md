@@ -73,4 +73,4 @@ Built with ❤️ using Three.js, Web Audio API, and modern web technologies.
 
 ---
 
-**Ready to roll? Open `index.html` in your browser and start playing! 🎲**
+**Ready to roll? Open `https://santubenia.github.io/3Dice/` in your browser and start playing! 🎲**
