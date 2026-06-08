@@ -204,17 +204,121 @@ function animate(time) {
   renderer.render(scene, camera);
 }
 
+// Generate fireworks sound using Web Audio API
+function playFireworksSound() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioContext.currentTime;
+    
+    // Create burst sounds
+    for (let i = 0; i < 8; i++) {
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+      
+      const freq = 150 + Math.random() * 250;
+      const duration = 0.1 + Math.random() * 0.15;
+      
+      osc.frequency.setValueAtTime(freq, now + i * 0.05);
+      osc.frequency.exponentialRampToValueAtTime(50, now + i * 0.05 + duration);
+      
+      gain.gain.setValueAtTime(0.3, now + i * 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.05 + duration);
+      
+      osc.start(now + i * 0.05);
+      osc.stop(now + i * 0.05 + duration);
+    }
+  } catch (e) {
+    console.log('Audio not supported');
+  }
+}
+
+let celebrationActive = false;
+let celebrationTimeout = null;
+
+function createFireworks() {
+  if (celebrationActive) return;
+  
+  celebrationActive = true;
+  const container = document.getElementById('app');
+  const fireworksContainer = document.createElement('div');
+  fireworksContainer.id = 'fireworks-container';
+  fireworksContainer.className = 'celebration-active';
+  
+  // Create multiple rounds of fireworks
+  for (let round = 0; round < 3; round++) {
+    setTimeout(() => {
+      if (!celebrationActive || !fireworksContainer.parentNode) return;
+      
+      // Create burst particles
+      for (let i = 0; i < 60; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'firework-particle';
+        
+        const angle = (Math.PI * 2 * i) / 60;
+        const distance = 100 + Math.random() * 150;
+        const x = 50 + Math.cos(angle) * distance / (window.innerWidth / 100);
+        const y = 40 + Math.sin(angle) * distance / (window.innerHeight / 100);
+        const duration = 1.2 + Math.random() * 0.6;
+        const hue = Math.random() * 360;
+        const delay = Math.random() * 0.1;
+        
+        particle.style.cssText = `
+          left: ${x}%;
+          top: ${y}%;
+          --delay: ${delay}s;
+          --duration: ${duration}s;
+          --hue: ${hue}deg;
+        `;
+        
+        fireworksContainer.appendChild(particle);
+      }
+      
+      playFireworksSound();
+    }, round * 400);
+  }
+  
+  container.appendChild(fireworksContainer);
+  
+  // Click anywhere to stop celebration
+  const stopCelebration = () => {
+    celebrationActive = false;
+    if (fireworksContainer.parentNode) fireworksContainer.remove();
+    document.removeEventListener('click', stopCelebration);
+    if (celebrationTimeout) clearTimeout(celebrationTimeout);
+  };
+  
+  document.addEventListener('click', stopCelebration);
+  
+  // Auto-remove after 5 seconds if not clicked
+  celebrationTimeout = setTimeout(() => {
+    if (celebrationActive) {
+      celebrationActive = false;
+      if (fireworksContainer.parentNode) fireworksContainer.remove();
+      document.removeEventListener('click', stopCelebration);
+    }
+  }, 5000);
+}
+
 function showResult(n) {
   const preview = document.getElementById('preview');
   const pv = document.getElementById('facePreview');
   const previewLabel = document.getElementById('previewLabel');
   const resultNum = Number(n);
   let message = `Result: ${resultNum}`;
+  let milestoneReached = false;
 
   if (guessValue !== null) {
     if (guessValue === resultNum) {
       score += 1;
       message = `Correct! ${resultNum}`;
+      
+      // Check for milestone (multiples of 5)
+      if (score % 5 === 0) {
+        milestoneReached = true;
+      }
     } else {
       message = `Wrong. ${resultNum}`;
     }
@@ -239,6 +343,11 @@ function showResult(n) {
     setTimeout(() => preview.classList.add('hidden'), 2000);
   } else if (preview) {
     preview.classList.add('hidden');
+  }
+
+  // Trigger fireworks if milestone reached
+  if (milestoneReached) {
+    createFireworks();
   }
 
   guessValue = null;
